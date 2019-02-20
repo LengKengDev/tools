@@ -43,10 +43,11 @@ class QuoteDailyMailer extends Mailable
     {
         $start = Carbon::parse("2017-02-07 01:00:00");
         $now = Carbon::now();
-
         $this->days = $start->diffInDays($now);
+        $quoteMode = $mode == 'AM' ? 0 : 1;
 
-        $quote = Quote::find($this->days % Quote::count() + 1);
+        $quote = Quote::where('type', $quoteMode)->where('day', $this->days % Quote::count() + 1)->first();
+
         $this->content = __($quote->content, ['em' => Quote::EM[rand(0, count(Quote::EM) - 1)]]);
 
         $this->subject = __("{$now->day}/{$now->month} <3 ".self::GREETING[$mode][$now->day % count(self::GREETING[$mode]) + 1],
