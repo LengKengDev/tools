@@ -46,7 +46,7 @@ class QuoteDailyMailer extends Mailable
         $this->days = $start->diffInDays($now);
         $quoteMode = $mode == 'AM' ? 0 : 1;
 
-        $quote = Quote::where('type', $quoteMode)->where('day', $this->days % Quote::count() + 1)->first();
+        $quote = Quote::where('type', $quoteMode)->where('day', $this->days % Quote::where('type', $quoteMode)->count() + 1)->first();
 
         $this->content = __($quote->content, ['em' => Quote::EM[rand(0, count(Quote::EM) - 1)]]);
 
