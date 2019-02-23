@@ -206,5 +206,9 @@ Chào buổi sáng chúc :em một ngày vui',
             'day' => $this->i++
         ]);
 
+        $quoteList = json_decode(file_get_contents(database_path('textures/quote.json')), true);
+        foreach ($quoteList as $quote) {
+            Quote::create($quote);
+        }
     }
 }
