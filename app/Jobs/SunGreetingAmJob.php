@@ -39,13 +39,17 @@ class SunGreetingAmJob implements ShouldQueue
 
         $response = Curl::to("https://api.chatwork.com/v2/rooms/{$this->room_id}/messages")
             ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
-            ->withData( array( 'body' => $this->quoteTemplate($quote )))
+            ->withData( array( 'body' => $this->quoteTemplate($now, $quote )))
             ->post();
-        echo $response.PHP_EOL;
+        echo $this->quoteTemplate($now, $quote ).PHP_EOL;
     }
 
-    public function quoteTemplate(Quote $quote)
+    public function quoteTemplate(Carbon $now, Quote $quote)
     {
-        return "[info][title]Quote trong ngày[/title]{$quote->content}[/info]";
+
+        return "Chào buổi sáng cả nhà ạ, hôm nay là ngày {$now->day}/{$now->month}.".PHP_EOL
+            ."Chúc mọi người một ngày làm việc hiệu quả và đầy niềm vui nhé!".PHP_EOL
+            ."Thông tin thời tiết ngày hôm nay:".PHP_EOL
+            ."[info][title]Quote trong ngày[/title]{$quote->content}[/info]";
     }
 }
