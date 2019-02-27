@@ -192,8 +192,13 @@ class PollsController extends Controller
     /**
      * @return string
      */
-    protected function closeAction() {
-        $poll = Poll::whereStatus(0)->whereRoom($this->room)->where('creator', $this->sender)->firstOrFail();
+    protected function closeAction($last = null) {
+        $poll = null;
+        if($last == null) {
+            $poll = Poll::whereStatus(0)->whereRoom($this->room)->where('creator', $this->sender)->firstOrFail();
+        } else {
+            $poll = $last;
+        }
 
         $responses = Response::where('poll_id', $poll->id)->where('action', 1)->get();
         $poll->update(['status' => 1]);
@@ -291,7 +296,7 @@ class PollsController extends Controller
             array_push($this->messages, 'Từ lúc e mặc cái áo mới chưa có cái poll nào ợ.');
         } else {
             if ($this->sender == $poll->creator) {
-                return $this->closeAction();
+                return $this->closeAction($poll);
             }
             $res = Curl::to("https://api.chatwork.com/v2/rooms/{$this->room}/members")
                 ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
@@ -299,7 +304,7 @@ class PollsController extends Controller
             $res = json_decode($res, true);
             foreach ($res as $elm) {
                 if ($elm['account_id'] == $this->sender && $elm['role'] == 'admin') {
-                    return $this->closeAction();
+                    return $this->closeAction($poll);
                 }
             }
         }
