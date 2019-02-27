@@ -19,8 +19,8 @@ class PollsController extends Controller
     protected $rawMsg;
     protected $sender;
     protected $message;
-    protected $pollOpenRegex = '/\@poll/';
-    protected $pollCloseRegex = '/\@endpoll/';
+    protected $pollOpenRegex = '/\#poll/';
+    protected $pollCloseRegex = '/\#endpoll/';
     protected $pollVoteRegex = '/(\+\d|\-\d)/';
     protected $pollVoteRegexPlus = '/\+\d/';
     protected $pollVoteRegexMinus = '/\-\d/';
