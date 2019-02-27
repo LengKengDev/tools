@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Poll;
+use App\Response;
 use Illuminate\Http\Request;
 use Ixudra\Curl\Facades\Curl;
 
@@ -21,6 +22,8 @@ class PollsController extends Controller
     protected $pollOpenRegex = '/\@poll/';
     protected $pollCloseRegex = '/\@endpoll/';
     protected $pollVoteRegex = '/(\+\d|\-\d)/';
+    protected $pollVoteRegexPlus = '/\+\d/';
+    protected $pollVoteRegexMinus = '/\-\d/';
     protected $helpCmdRegex = '/help/';
     protected $removeRegex = '/(\[.+\])/';
     protected $messages = [];
@@ -47,8 +50,10 @@ class PollsController extends Controller
                 $this->response = $this->openPollAction();
                 break;
             case self::VOTE:
+                $this->response = $this->voteAction();
                 break;
             case self::CLOSE:
+                $this->response = $this->closeAction();
                 break;
             default: break;
         }
@@ -79,7 +84,7 @@ class PollsController extends Controller
     }
 
     protected function openPollAction() {
-        $poll = Poll::whereStatus(0)->first();
+        $poll = Poll::whereStatus(0)->whereRoom($this->room)->first();
 
         if($poll) {
             array_push($this->messages, 'Đang có poll được mở rồi nhé người anh em thiện lành.');
@@ -87,12 +92,13 @@ class PollsController extends Controller
             $poll = Poll::create([
                 'content' => $this->stringRemoveRegex($this->rawMsg),
                 'creator' => $this->sender,
-                'message' => $this->message
+                'message' => $this->message,
+                'room' => $this->room
             ]);
             array_push($this->messages, 'TO ALL >>>');
             array_push($this->messages, __('Mọi người vào vote POLL của [picon::aid] nhé.', ['aid' => $this->sender]));
             array_push($this->messages, "[info][title][picon:$this->sender}] say:[/title]{$poll->content}[/info]");
-            array_push($this->messages, 'Vote bằng cách TO em hoặc reply tin nhắn này nhé.');
+            array_push($this->messages, 'Vote bằng cách TO em hoặc reply tin nhắn này với cú pháp +1 or -1 nhé.');
             array_push($this->messages, 'Cảm ơn mọi người nhiều.');
         }
         $this->response = $this->newPollMessage();
@@ -102,5 +108,47 @@ class PollsController extends Controller
 
     protected function newPollMessage () {
         return implode(PHP_EOL, $this->messages);
+    }
+
+    protected function voteAction() {
+        $poll = Poll::whereStatus(0)->whereRoom($this->room)->firstOrFail();
+
+        $reply = Response::where('sender', $this->sender)
+        ->where('poll_id', $poll->id)->first();
+
+        if($reply == null) {
+            $reply = Response::create(['sender' => $this->sender, 'poll_id' => $poll->id]);
+        }
+
+        if ($this->pollDetect($this->stringRemoveRegex($this->rawMsg), $this->pollVoteRegexPlus)) {
+            $reply->update(['action' => 1]);
+            array_push($this->messages, '(h)');
+        } else {
+            $reply->update(['action' => -1]);
+            array_push($this->messages, ';(');
+        }
+        $this->response = $this->newPollMessage();
+        $this->sendMessage($this->room, $this->response);
+        return $this->response;
+    }
+
+    protected function closeAction() {
+        $poll = Poll::whereStatus(0)->whereRoom($this->room)->where('creator', $this->sender)->firstOrFail();
+
+        $responses = Response::where('poll_id', $poll->id)->where('action', 1)->get();
+        $poll->update(['status' => 1]);
+        $str = "";
+        foreach ($responses as $res) {
+            $str .= __('[picon::id]', ['id' => $res->sender]);
+        }
+        array_push($this->messages, 'TO ALL >>>');
+        array_push($this->messages, 'Cảm ơn mọi người vì đã tham gia VOTE ạ.');
+        array_push($this->messages, __('Poll của [picon::sender] đã kết thúc, số người vote OK là: :total !',
+            ['sender' => $poll->creator, 'total' => count($responses)]));
+        array_push($this->messages, 'Danh sách người VOTE:');
+        array_push($this->messages, '[info]'.$str.'[info]');
+        $this->response = $this->newPollMessage();
+        $this->sendMessage($this->room, $this->response);
+        return $this->response;
     }
 }

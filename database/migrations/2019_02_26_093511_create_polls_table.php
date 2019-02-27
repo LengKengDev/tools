@@ -17,6 +17,7 @@ class CreatePollsTable extends Migration
             $table->increments('id');
             $table->string('creator');
             $table->string('message');
+            $table->string('room');
             $table->text('content')->nullable();
             $table->integer('status')->default(0);
             $table->timestamps();
