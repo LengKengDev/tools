@@ -3,29 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Poll;
+use App\Quote;
 use App\Response;
 use Illuminate\Http\Request;
 use Ixudra\Curl\Facades\Curl;
 
 class PollsController extends Controller
 {
+    const ALL= -1;
     const HELP = 0;
     const OPEN = 1;
     const VOTE = 2;
     const CLOSE = 3;
+    const INFO = 4;
+    const QUOTE = 5;
 
     protected $token;
     protected $room;
     protected $rawMsg;
     protected $sender;
     protected $message;
-    protected $pollOpenRegex = '/\#poll/';
-    protected $pollCloseRegex = '/\#endpoll/';
-    protected $pollVoteRegex = '/(\+\d|\-\d)/';
-    protected $pollVoteRegexPlus = '/\+\d/';
-    protected $pollVoteRegexMinus = '/\-\d/';
-    protected $helpCmdRegex = '/help/';
-    protected $removeRegex = '/(\[.+\])/';
+    protected $pollOpenRegex = '/\#poll/i';
+    protected $pollCloseRegex = '/\#endpoll/i';
+    protected $pollVoteRegex = '/(\+\d|\-\d)/i';
+    protected $pollVoteRegexPlus = '/\+\d/i';
+    protected $pollVoteRegexMinus = '/\-\d/i';
+    protected $helpCmdRegex = '/#help/i';
+    protected $infoCmdRegex = '/#info/i';
+    protected $quoteCmdRegex = '/#quote/i';
+    protected $allCmdRegex = '/\[toall\]/i';
+    protected $removeRegex = '/(\[.+\])/i';
     protected $messages = [];
     protected $response;
     /**
@@ -36,6 +43,10 @@ class PollsController extends Controller
         $this->token = env('CW_TOKEN');
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function webHook(Request $request)
     {
         $this->room = $request->input('webhook_event.room_id');
@@ -45,6 +56,7 @@ class PollsController extends Controller
 
         switch ($type = $this->pollType($this->rawMsg)) {
             case self::HELP:
+                $this->response = $this->helpAction();
                 break;
             case self::OPEN:
                 $this->response = $this->openPollAction();
@@ -55,11 +67,24 @@ class PollsController extends Controller
             case self::CLOSE:
                 $this->response = $this->closeAction();
                 break;
+            case self::INFO:
+                $this->response = $this->infoAction();
+                break;
+            case self::QUOTE:
+                $this->response = $this->quoteAction();
+                break;
+            case self::ALL:
+                break;
             default: break;
         }
         return response()->json(['type' => $type, 'status' => $this->response]);
     }
 
+    /**
+     * @param $room
+     * @param string $content
+     * @return mixed
+     */
     protected function sendMessage($room, $content = "") {
         return Curl::to("https://api.chatwork.com/v2/rooms/{$room}/messages")
             ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
@@ -67,23 +92,42 @@ class PollsController extends Controller
             ->post();
     }
 
+    /**
+     * @param $msg
+     * @param $regex
+     * @return false|int
+     */
     protected function pollDetect ($msg, $regex) {
         return preg_match($regex, $msg);
     }
 
+    /**
+     * @param $msg
+     * @return int
+     */
     protected function pollType($msg) {
         $msg = $this->stringRemoveRegex($msg);
+        if ($this->pollDetect($this->rawMsg, $this->allCmdRegex)) return self::ALL;
         if ($this->pollDetect($msg, $this->helpCmdRegex)) return self::HELP;
         if ($this->pollDetect($msg, $this->pollOpenRegex)) return self::OPEN;
         if ($this->pollDetect($msg, $this->pollVoteRegex)) return self::VOTE;
         if ($this->pollDetect($msg, $this->pollCloseRegex)) return self::CLOSE;
+        if ($this->pollDetect($msg, $this->infoCmdRegex)) return self::INFO;
+        if ($this->pollDetect($msg, $this->quoteCmdRegex)) return self::QUOTE;
         return -1;
     }
 
+    /**
+     * @param $msg
+     * @return string|string[]|null
+     */
     protected function stringRemoveRegex($msg) {
         return preg_replace($this->removeRegex, "", $msg);
     }
 
+    /**
+     * @return string
+     */
     protected function openPollAction() {
         $poll = Poll::whereStatus(0)->whereRoom($this->room)->first();
 
@@ -98,9 +142,9 @@ class PollsController extends Controller
             ]);
             array_push($this->messages, 'TO ALL >>>');
             array_push($this->messages, __('Mọi người vào vote POLL của [picon::aid] nhé.', ['aid' => $this->sender]));
-            array_push($this->messages, "[info][title][picon:$this->sender}] say:[/title]{$poll->content}[/info]");
-            array_push($this->messages, 'Vote bằng cách TO em hoặc reply tin nhắn này với cú pháp +1 or -1 nhé.');
-            array_push($this->messages, 'Cảm ơn mọi người nhiều.');
+            array_push($this->messages, "[info][title][picon:{$this->sender}] say:[/title]{$poll->content}[/info]");
+            array_push($this->messages, 'Vote bằng cách TO em hoặc REPLY tin nhắn cho em với cú pháp +1 or -1 nhé.');
+            array_push($this->messages, 'Cảm ơn mọi người nhiều lắm');
         }
         $this->response = $this->newPollMessage();
         $this->sendMessage($this->room, $this->response);
@@ -111,6 +155,9 @@ class PollsController extends Controller
         return implode(PHP_EOL, $this->messages);
     }
 
+    /**
+     * @return int|string
+     */
     protected function voteAction() {
         $poll = Poll::whereStatus(0)->whereRoom($this->room)->firstOrFail();
 
@@ -136,6 +183,9 @@ class PollsController extends Controller
         return $this->response;
     }
 
+    /**
+     * @return string
+     */
     protected function closeAction() {
         $poll = Poll::whereStatus(0)->whereRoom($this->room)->where('creator', $this->sender)->firstOrFail();
 
@@ -147,12 +197,77 @@ class PollsController extends Controller
         }
         array_push($this->messages, 'TO ALL >>>');
         array_push($this->messages, 'Cảm ơn mọi người vì đã tham gia VOTE ạ.');
-        array_push($this->messages, __('Poll của [picon::sender] đã kết thúc, số người vote OK là: :total !',
-            ['sender' => $poll->creator, 'total' => count($responses)]));
+        array_push($this->messages, __('Poll của [picon::sender] tạo từ :time đã kết thúc, số người vote +1 là: :total !',
+            ['sender' => $poll->creator, 'time' => $poll->created_at->diffForHumans(), 'total' => count($responses)]));
         if(strlen($str) > 0) {
             array_push($this->messages, 'Danh sách người VOTE:');
             array_push($this->messages, '[info]'.$str.'[/info]');
         }
+        $this->response = $this->newPollMessage();
+        $this->sendMessage($this->room, $this->response);
+        return $this->response;
+    }
+
+    /**
+     * @return string
+     */
+    private function helpAction()
+    {
+        array_push($this->messages, 'Em sẽ hỗ trợ mọi người tạo poll trên chatwork nhanh chóng với chỉ vài giây ạ.');
+        array_push($this->messages, '■　Dưới đây là các lệnh để sử dụng:');
+        array_push($this->messages, '[info]#help - Xem hướng dẫn sử dụng');
+        array_push($this->messages, '#poll - Mở một poll mới, bất cứ tin nhắn nào có nó đều sẽ được em chuyển thành poll ợ.');
+        array_push($this->messages, '#endpoll - Kết thúc một poll đang open, CHỈ có người mở poll mới có hiệu quả.');
+        array_push($this->messages, '#info - Xem kết quả realtime của poll đang mở hoặc poll gần nhất trong room. Ai cũng xem được.');
+        array_push($this->messages, '#quote - Lấy một quote ngẫu nhiên thú vị :D.[/info]');
+        array_push($this->messages, '■　Lưu ý:');
+        array_push($this->messages, '・Chỉ có một poll được mở trong một phiên. Nghĩa là phải end thì mới open mới đc');
+        array_push($this->messages, '・Mọi lệnh đều sử dụng bằng cách To hoặc Re với em ạ.');
+        $quote = Quote::whereType(2)->inRandomOrder()->first();
+        array_push($this->messages, '■　Nhân tiện tặng mọi người 1 câu quote ạ　(h) :');
+        array_push($this->messages, '[info]'.$quote->content.'[/info]');
+
+        $this->response = $this->newPollMessage();
+        $this->sendMessage($this->room, $this->response);
+        return $this->response;
+    }
+
+    /**
+     * @return string
+     */
+    private function infoAction()
+    {
+        $poll = Poll::whereRoom($this->room)->orderBy('id', 'DESC')->first();
+        if ($poll == null) {
+            array_push($this->messages, 'Từ lúc e mặc cái áo mới chưa có cái poll nào ợ.');
+        } else {
+            $responses = Response::where('poll_id', $poll->id)->where('action', 1)->get();
+            $str = "";
+            foreach ($responses as $res) {
+                $str .= __('[picon::id]', ['id' => $res->sender]);
+            }
+            array_push($this->messages, __('Poll được tạo bởi [picon::sender] từ :time, số người :status vote +1 là: :total !',
+                ['sender' => $poll->creator, 'time' => $poll->created_at->diffForHumans(), 'status' => $poll->status == 0 ? 'đang' : 'đã','total' => count($responses)]));
+            if(strlen($str) > 0) {
+                array_push($this->messages, 'Danh sách người VOTE:');
+                array_push($this->messages, '[info]'.$str.'[/info]');
+            }
+        }
+
+        $this->response = $this->newPollMessage();
+        $this->sendMessage($this->room, $this->response);
+        return $this->response;
+    }
+
+    /**
+     * @return string
+     */
+    private function quoteAction()
+    {
+        $quote = Quote::whereType(2)->inRandomOrder()->first();
+        array_push($this->messages, '(mailaanhem)');
+        array_push($this->messages, '[info][title]Quote ngẫu nhiên:[/title]'.$quote->content.'[/info]');
+
         $this->response = $this->newPollMessage();
         $this->sendMessage($this->room, $this->response);
         return $this->response;
