@@ -18,12 +18,13 @@ class PollsController extends Controller
     protected $rawMsg;
     protected $sender;
     protected $message;
-    protected $pollOpenRegex = '/\@poll/g';
-    protected $pollCloseRegex = '/\@endpoll/g';
+    protected $pollOpenRegex = '/\@poll/';
+    protected $pollCloseRegex = '/\@endpoll/';
     protected $pollVoteRegex = '/(\+\d|\-\d)/';
     protected $helpCmdRegex = '/help/';
-    protected $removeRegex = '/(\[.+\])/g';
+    protected $removeRegex = '/(\[.+\])/';
     protected $messages = [];
+    protected $response;
     /**
      * PollsController constructor.
      */
@@ -39,10 +40,11 @@ class PollsController extends Controller
         $this->sender = $request->input('webhook_event.from_account_id');
         $this->message = $request->input('webhook_event.message_id');
 
-        switch ($this->pollType($this->rawMsg)) {
+        switch ($type = $this->pollType($this->rawMsg)) {
             case self::HELP:
                 break;
             case self::OPEN:
+                $this->response = $this->openPollAction();
                 break;
             case self::VOTE:
                 break;
@@ -50,7 +52,7 @@ class PollsController extends Controller
                 break;
             default: break;
         }
-        return response()->json(['status' => 'OK']);
+        return response()->json(['type' => $type, 'status' => $this->response]);
     }
 
     protected function sendMessage($room, $content = "") {
@@ -78,6 +80,7 @@ class PollsController extends Controller
 
     protected function openPollAction() {
         $poll = Poll::whereStatus(0)->first();
+
         if($poll) {
             array_push($this->messages, 'Đang có poll được mở rồi nhé người anh em thiện lành.');
         } else {
@@ -87,16 +90,17 @@ class PollsController extends Controller
                 'message' => $this->message
             ]);
             array_push($this->messages, 'TO ALL >>>');
-            array_push($this->messages, __('Mọi người vào vote POLL của [Reply aid=:aid] nhé.', ['aid' => $this->sender]));
-            array_push($this->messages, "[info][title][picon:$this->sender}][/title]{$poll->content}[/info]");
-            array_push($this->messages, 'Vote bằng cách TO mình hoặc reply tin nhắn này.');
+            array_push($this->messages, __('Mọi người vào vote POLL của [picon::aid] nhé.', ['aid' => $this->sender]));
+            array_push($this->messages, "[info][title][picon:$this->sender}] say:[/title]{$poll->content}[/info]");
+            array_push($this->messages, 'Vote bằng cách TO em hoặc reply tin nhắn này nhé.');
             array_push($this->messages, 'Cảm ơn mọi người nhiều.');
-            $this->sendMessage($this->room, $this->newPollMessage());
         }
+        $this->response = $this->newPollMessage();
+        $this->sendMessage($this->room, $this->response);
+        return $this->response;
     }
 
     protected function newPollMessage () {
-        return implode('\n', $this->messages);
+        return implode(PHP_EOL, $this->messages);
     }
-
 }
