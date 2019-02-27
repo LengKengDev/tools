@@ -72,6 +72,7 @@ class PollsController extends Controller
     }
 
     protected function pollType($msg) {
+        $msg = $this->stringRemoveRegex($msg);
         if ($this->pollDetect($msg, $this->helpCmdRegex)) return self::HELP;
         if ($this->pollDetect($msg, $this->pollOpenRegex)) return self::OPEN;
         if ($this->pollDetect($msg, $this->pollVoteRegex)) return self::VOTE;
@@ -123,9 +124,12 @@ class PollsController extends Controller
         if ($this->pollDetect($this->stringRemoveRegex($this->rawMsg), $this->pollVoteRegexPlus)) {
             $reply->update(['action' => 1]);
             array_push($this->messages, '(h)');
-        } else {
+        }
+        else if ($this->pollDetect($this->stringRemoveRegex($this->rawMsg), $this->pollVoteRegexMinus)){
             $reply->update(['action' => -1]);
             array_push($this->messages, ';(');
+        } else {
+            return 1;
         }
         $this->response = $this->newPollMessage();
         $this->sendMessage($this->room, $this->response);
@@ -145,8 +149,10 @@ class PollsController extends Controller
         array_push($this->messages, 'Cảm ơn mọi người vì đã tham gia VOTE ạ.');
         array_push($this->messages, __('Poll của [picon::sender] đã kết thúc, số người vote OK là: :total !',
             ['sender' => $poll->creator, 'total' => count($responses)]));
-        array_push($this->messages, 'Danh sách người VOTE:');
-        array_push($this->messages, '[info]'.$str.'[info]');
+        if(strlen($str) > 0) {
+            array_push($this->messages, 'Danh sách người VOTE:');
+            array_push($this->messages, '[info]'.$str.'[/info]');
+        }
         $this->response = $this->newPollMessage();
         $this->sendMessage($this->room, $this->response);
         return $this->response;
