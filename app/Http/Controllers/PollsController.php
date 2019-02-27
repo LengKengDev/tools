@@ -17,6 +17,7 @@ class PollsController extends Controller
     const CLOSE = 3;
     const INFO = 4;
     const QUOTE = 5;
+    const FORCE_CLOSE = 6;
 
     protected $token;
     protected $room;
@@ -25,6 +26,7 @@ class PollsController extends Controller
     protected $message;
     protected $pollOpenRegex = '/\#poll/i';
     protected $pollCloseRegex = '/\#endpoll/i';
+    protected $forceCloseRegex = '/\#forceendpoll/i';
     protected $pollVoteRegex = '/(\+\d|\-\d)/i';
     protected $pollVoteRegexPlus = '/\+\d/i';
     protected $pollVoteRegexMinus = '/\-\d/i';
@@ -66,6 +68,9 @@ class PollsController extends Controller
                 break;
             case self::CLOSE:
                 $this->response = $this->closeAction();
+                break;
+            case self::FORCE_CLOSE:
+                $this->response = $this->forceCloseAction();
                 break;
             case self::INFO:
                 $this->response = $this->infoAction();
@@ -112,6 +117,7 @@ class PollsController extends Controller
         if ($this->pollDetect($msg, $this->pollOpenRegex)) return self::OPEN;
         if ($this->pollDetect($msg, $this->pollVoteRegex)) return self::VOTE;
         if ($this->pollDetect($msg, $this->pollCloseRegex)) return self::CLOSE;
+        if ($this->pollDetect($msg, $this->forceCloseRegex)) return self::FORCE_CLOSE;
         if ($this->pollDetect($msg, $this->infoCmdRegex)) return self::INFO;
         if ($this->pollDetect($msg, $this->quoteCmdRegex)) return self::QUOTE;
         return -1;
@@ -216,9 +222,10 @@ class PollsController extends Controller
         array_push($this->messages, 'Em sẽ hỗ trợ mọi người tạo poll trên chatwork nhanh chóng với chỉ vài giây ạ.');
         array_push($this->messages, '■　Dưới đây là các lệnh để sử dụng:');
         array_push($this->messages, '[info]#help - Xem hướng dẫn sử dụng');
-        array_push($this->messages, '#poll - Mở một poll mới, bất cứ tin nhắn nào có nó đều sẽ được em chuyển thành poll ợ.');
+        array_push($this->messages, '#poll - Mở một poll mới, bất cứ tin nhắn nào có nó đều sẽ được em chuyển thành poll ợ. Cú pháp: "#poll nội dung rất dài đằng sau.." ');
         array_push($this->messages, '#endpoll - Kết thúc một poll đang open, CHỈ có người mở poll mới có hiệu quả.');
         array_push($this->messages, '#info - Xem kết quả realtime của poll đang mở hoặc poll gần nhất trong room. Ai cũng xem được.');
+        array_push($this->messages, '#forceendpoll - End poll trong trường hợp người tạo mất tích, các admin room sẽ có quyền dùng lệnh này.');
         array_push($this->messages, '#quote - Lấy một quote ngẫu nhiên thú vị :D.[/info]');
         array_push($this->messages, '■　Lưu ý:');
         array_push($this->messages, '・Chỉ có một poll được mở trong một phiên. Nghĩa là phải end thì mới open mới đc');
@@ -268,6 +275,32 @@ class PollsController extends Controller
         array_push($this->messages, '(mailaanhem)');
         array_push($this->messages, '[info][title]Quote ngẫu nhiên:[/title]'.$quote->content.'[/info]');
 
+        $this->response = $this->newPollMessage();
+        $this->sendMessage($this->room, $this->response);
+        return $this->response;
+    }
+
+    /**
+     * @return string
+     */
+    private function forceCloseAction()
+    {
+        $poll = Poll::whereStatus(0)->whereRoom($this->room)->first();
+
+        if ($poll == null) {
+            array_push($this->messages, 'Từ lúc e mặc cái áo mới chưa có cái poll nào ợ.');
+        } else {
+            $res = Curl::to("https://api.chatwork.com/v2/rooms/{$this->room}/members")
+                ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
+                ->get();
+            $res = json_decode($res, true);
+            foreach ($res as $elm) {
+                if ($elm['account_id'] == $this->sender && $elm['role'] == 'admin') {
+                    return $this->closeAction();
+                }
+            }
+        }
+        array_push($this->messages, 'Em không có quyền close poll này, bảo admin close ấy.');
         $this->response = $this->newPollMessage();
         $this->sendMessage($this->room, $this->response);
         return $this->response;
