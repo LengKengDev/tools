@@ -290,6 +290,9 @@ class PollsController extends Controller
         if ($poll == null) {
             array_push($this->messages, 'Từ lúc e mặc cái áo mới chưa có cái poll nào ợ.');
         } else {
+            if ($this->sender == $poll->creator) {
+                return $this->closeAction();
+            }
             $res = Curl::to("https://api.chatwork.com/v2/rooms/{$this->room}/members")
                 ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
                 ->get();
