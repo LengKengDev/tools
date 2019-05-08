@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SunGreetingAmJob;
+use App\Jobs\SunGreetingPmJob;
 use Illuminate\Console\Command;
 
 class SunGreeting extends Command
@@ -38,6 +39,11 @@ class SunGreeting extends Command
      */
     public function handle()
     {
-        dispatch(new SunGreetingAmJob());
+        if ($this->argument('mode') == 'AM') {
+            dispatch(new SunGreetingAmJob());
+        }
+        else {
+            dispatch(new SunGreetingPmJob());
+        }
     }
 }

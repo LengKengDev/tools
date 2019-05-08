@@ -11,7 +11,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Ixudra\Curl\Facades\Curl;
 
-class SunGreetingAmJob implements ShouldQueue
+class SunGreetingPmJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -39,22 +39,21 @@ class SunGreetingAmJob implements ShouldQueue
      */
     public function handle()
     {
-        $now = Carbon::now();
-        $quote = Quote::whereType(2)->inRandomOrder()->first();
 
         $response = Curl::to("https://api.chatwork.com/v2/rooms/{$this->room_id}/messages")
             ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
-            ->withData( array( 'body' => $this->quoteTemplate($now, $quote )))
+            ->withData( array( 'body' => $this->quoteTemplate()))
             ->post();
     }
 
-    public function quoteTemplate(Carbon $now, Quote $quote)
+    public function quoteTemplate()
     {
 
-        return "CHÀO BUỔI SÁNG CẢ NHÀ Ạ {$now->day}/{$now->month}.".PHP_EOL
-            ."Chúc mọi người một ngày làm việc hiệu quả và đầy niềm vui nhé!".PHP_EOL
+        return "(otsu)".PHP_EOL
+            ."MỘT NGÀY LÀM VIỆC SẮP KẾT THÚC RỒI.".PHP_EOL
+            ."Chúc mọi người một buổi tối thật thoải mái nhé!".PHP_EOL
             ."[info][title]Thông tin thời tiết ngày hôm nay:[/title]{$this->parseWeather()}[/info]".PHP_EOL
-            ."[info][title]Quote trong ngày[/title]{$quote->content}[/info] (dance2)(dance3)(dance4)(dance5)(dance6)(dance2)(dance3)(dance4)(dance5)(dance6)";
+            ."(dance2)(dance3)(dance4)(dance5)(dance6)(dance2)(dance3)(dance4)(dance5)(dance6)";
     }
 
     protected function parseWeather () {
