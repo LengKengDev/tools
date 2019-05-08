@@ -15,8 +15,8 @@ class SunGreetingAmJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $token = 'f9467b3462da1a2c04a2a8ad42a24b2d';
-    protected $room_id = '45126716';
+    protected $token;
+    protected $room_id;
     /**
      * Create a new job instance.
      *
@@ -24,7 +24,8 @@ class SunGreetingAmJob implements ShouldQueue
      */
     public function __construct()
     {
-        //
+        $this->token = env('CW_TOKEN');
+        $this->room_id = env('CW_ROOM');
     }
 
     /**

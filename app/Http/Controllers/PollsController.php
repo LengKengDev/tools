@@ -37,6 +37,7 @@ class PollsController extends Controller
     protected $removeRegex = '/(\[.+\])/i';
     protected $messages = [];
     protected $response;
+
     /**
      * PollsController constructor.
      */
@@ -308,7 +309,7 @@ class PollsController extends Controller
                 }
             }
         }
-        array_push($this->messages, 'Em không có quyền close poll này, bảo admin close ấy.');
+        if (count) array_push($this->messages, 'Em không có quyền close poll này, bảo admin close ấy.');
         $this->response = $this->newPollMessage();
         $this->sendMessage($this->room, $this->response);
         return $this->response;
