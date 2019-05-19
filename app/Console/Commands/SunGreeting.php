@@ -39,11 +39,17 @@ class SunGreeting extends Command
      */
     public function handle()
     {
-        if ($this->argument('mode') == 'AM') {
-            dispatch(new SunGreetingAmJob());
+        if (!$this->isTodayWeekend()) {
+            if ($this->argument('mode') == 'AM') {
+                dispatch(new SunGreetingAmJob());
+            }
+            else {
+                dispatch(new SunGreetingPmJob());
+            }
         }
-        else {
-            dispatch(new SunGreetingPmJob());
-        }
+    }
+
+    function isTodayWeekend() {
+        return in_array(date("l"), ["Saturday", "Sunday"]);
     }
 }
