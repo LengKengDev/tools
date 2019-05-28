@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\RemoveFileCommand;
 use App\Console\Commands\SendGreetingEmail;
 use App\Console\Commands\SunGreeting;
 use Illuminate\Console\Scheduling\Schedule;
@@ -16,7 +17,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         SendGreetingEmail::class,
-        SunGreeting::class
+        SunGreeting::class,
+        RemoveFileCommand::class
     ];
 
     /**
