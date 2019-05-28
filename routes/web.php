@@ -23,3 +23,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', 'HomeController@index')->name('home');
     Route::resource('rooms', 'RoomsController')->only(['index', 'show']);
 });
+
+Route::resource('watermark', 'WatermarkController')->only(['index', 'store']);
