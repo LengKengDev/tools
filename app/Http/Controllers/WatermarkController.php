@@ -74,7 +74,7 @@ class WatermarkController extends Controller
 
             return back()->with('file', $zip_file);
         } catch (Exception $e) {
-            return back()->with('status', 'Error!');
+            return back()->with('status', $e->getMessage());
         }
     }
 }
