@@ -9,6 +9,7 @@
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="{{ asset('css/app.css') }}">
         <!-- Styles -->
         <style>
             html, body {
@@ -87,6 +88,12 @@
                 <div class="links">
                     <a href="https://github.com/LengKengDev/tools"><i class="fa fa-fw fa-github"></i>Github</a>
                     <a href="https://fb.com/ohmygodvt95"><i class="fa fa-fw fa-facebook-square"></i>ohmygodvt95</a>
+                </div>
+
+                <div class="card mt-4 shadow border-0" style="width: 20rem;">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><a href="{{ route('watermark.index') }}">Watermark PDF</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
