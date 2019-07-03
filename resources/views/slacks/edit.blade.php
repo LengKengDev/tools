@@ -12,7 +12,7 @@
 
                     <div class="card-body">
                         <p class="text-center">Xem hướng dẫn tại <a
-                                    href="{{route('slacks.create')}}">ĐÂY</a>.</p>
+                                    href="{{route('slacks.create')}}" target="_blank">ĐÂY</a>.</p>
                         <form action="{{ route('slacks.update', $slack) }}" method="POST">
                             @csrf
                             @method('PUT')
