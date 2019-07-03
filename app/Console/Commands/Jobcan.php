@@ -44,8 +44,8 @@ class Jobcan extends Command
 
         foreach ( $slacks as $slack) {
             $time = $this->argument('type') == 'checkin'
-                ? now()->addMinutes(mt_rand(10, 25))
-                : now()->addMinutes(mt_rand(15, 60));
+                ? now()->addMinutes(mt_rand(15, 25))
+                : now()->addMinutes(mt_rand(1, 30));
             dispatch(new TouchJob($slack, $this->argument('type')))->delay($time);
             activity()->performedOn($slack)
                 ->causedBy($slack->user)
