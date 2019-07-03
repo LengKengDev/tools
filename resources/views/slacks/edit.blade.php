@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card">
+                <div class="card shadow border-0">
                     <div class="card-header">
                         編集
                         <a href="{{ route('home') }}" class="btn btn-outline-danger btn-sm float-right"><i class="fa fa-fw fa-arrow-left"></i>戻る</a>
@@ -103,7 +103,7 @@
             </div>
             <div class="col-md-8">
                 <br>
-                <div class="card">
+                <div class="card shadow border-0">
                     <div class="card-header">
                         Recent activities
                     </div>
