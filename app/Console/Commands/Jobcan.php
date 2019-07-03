@@ -46,7 +46,7 @@ class Jobcan extends Command
             $time = $this->argument('type') == 'checkin'
                 ? now()->addMinutes(mt_rand(10, 25))
                 : now()->addMinutes(mt_rand(15, 60));
-            dispatch(new TouchJob($slack))->delay($time);
+            dispatch(new TouchJob($slack, $this->argument('type')))->delay($time);
             activity()->performedOn($slack)
                 ->causedBy($slack->user)
                 ->log($this->argument('type').' スケジュール済み　'.$time->toTimeString());
