@@ -106,7 +106,7 @@ class TouchJob implements ShouldQueue
         if($this->slackCommandExecute('/jobcan_touch')) {
             $this->notify("打刻しました。（退室）");
         } else {
-            $this->notify("エラーが発生しました。まだ打刻しました。");
+            $this->notify("エラーが発生しました。まだ打刻しません。");
         }
     }
 }

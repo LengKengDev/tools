@@ -20,7 +20,7 @@
                                 <label for="email" class="col-md-3 col-form-label text-md-right">{{ __('Slack token') }} <span class="text-danger">*</span></label>
 
                                 <div class="col-md-9">
-                                    <input id="email" type="text" class="form-control{{ $errors->has('token') ? ' is-invalid' : '' }}" name="token" value="{{ $slack->token }}" required autofocus>
+                                    <input id="email" type="text" class="form-control{{ $errors->has('token') ? ' is-invalid' : '' }}" name="token" value="{{ $slack->token }}" required autofocus placeholder="e.g. xoxp-xxxxxxxxxxxxx">
 
                                     @if ($errors->has('token'))
                                         <span class="invalid-feedback" role="alert">
@@ -57,6 +57,29 @@
                                     @if ($errors->has('checkout'))
                                         <span class="invalid-feedback" role="alert">
                                         <strong>{{ $errors->first('checkout') }}</strong>
+                                    </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label for="email" class="col-md-3 col-form-label text-md-right">{{ __('Slack Workspace') }} <span class="text-danger">*</span></label>
+
+                                <div class="col-md-9 pt-2">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <input id="email" type="radio" class="{{ $errors->has('workspace') ? ' is-invalid' : '' }}" name="workspace" value="1" {{ $slack->channel == null ? 'checked' : '' }}> もうJobcan Autobotを参加した。<a
+                                                    href="https://join.slack.com/t/jobcanautobot/signup"><i class="fa fa-fw fa-slack"></i>Workspaceのリンク</a>
+                                        </div>
+                                        <div class="col-12">
+                                            <input id="email" type="radio" class="{{ $errors->has('workspace') ? ' is-invalid' : '' }}" name="workspace" value="0" {{ $slack->channel != null ? 'checked' : '' }}> まだJobcan Autobotを参加しないが、その他のWorkspaceを参加している。
+
+                                        </div>
+                                    </div>
+
+                                    @if ($errors->has('workspace'))
+                                        <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $errors->first('workspace') }}</strong>
                                     </span>
                                     @endif
                                 </div>
