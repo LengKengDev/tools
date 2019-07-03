@@ -92,7 +92,7 @@ class TouchJob implements ShouldQueue
      */
     protected function checkin() {
         if ($this->slackCommandExecute('/jobcan_touch')) {
-            $this->notify("打刻しました。（出勤）");
+            $this->notify("打刻しました。（入室）");
         }
         else {
             $this->notify("エラーが発生しました。まだ打刻しません。");
@@ -104,7 +104,7 @@ class TouchJob implements ShouldQueue
      */
     protected function checkout() {
         if($this->slackCommandExecute('/jobcan_touch')) {
-            $this->notify("打刻しました。（退勤）");
+            $this->notify("打刻しました。（退室）");
         } else {
             $this->notify("エラーが発生しました。まだ打刻しました。");
         }
