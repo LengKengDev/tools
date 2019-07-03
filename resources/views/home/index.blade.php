@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card">
+            <div class="card shadow border-0">
                 <div class="card-header">ダッシュボード</div>
                 <div class="card-body">
                     <div class="text-center">

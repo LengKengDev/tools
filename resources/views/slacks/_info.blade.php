@@ -1,10 +1,13 @@
 <div class="row">
     <div class="col-sm-12">
         <h4 class="text-center text-uppercase">Hướng dẫn</h4>
-        <p>Để có thể sử dụng Jobcan autobot cần sử dụng một số thông tin cần thiết như Slack token, slack public channel id, dưới đây là hướng dẫn để có thể lấy được những thông tin cần thiết này.</p>
-        <hr>
+        <p>Để có thể sử dụng Jobcan autobot cần sử dụng một số thông tin cần thiết
+            như Slack token, slack public channel id, dưới đây là hướng dẫn để có
+            thể lấy được những thông tin cần thiết này.
+            </p>
+        <p class="text-center text-muted">Hãy Click vào từng bước để xem chi tiết.</p>
         <div id="accordion">
-            <div class="card">
+            <div class="card shadow border-0">
                 <div class="card-header">
                     <a class="card-link" data-toggle="collapse" href="#collapseOne">
                         1. Liên kết jobcan với Slack
@@ -24,7 +27,7 @@
                         </ul>                    </div>
                 </div>
             </div>
-            <div class="card">
+            <div class="card shadow border-0">
                 <div class="card-header">
                     <a class="collapsed card-link" data-toggle="collapse" href="#collapseTwo">
                         2. Lấy slack token
@@ -43,7 +46,7 @@
                         </ul>                    </div>
                 </div>
             </div>
-            <div class="card">
+            <div class="card shadow border-0">
                 <div class="card-header">
                     <a class="collapsed card-link" data-toggle="collapse" href="#collapseThree">
                         3. Cấu hình Slack channel và Chatwork notify
