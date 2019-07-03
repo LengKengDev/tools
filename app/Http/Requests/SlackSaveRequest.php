@@ -17,7 +17,9 @@ class SlackSaveRequest extends SlackRequest
         return [
             'token' => 'required|unique:slacks',
             'checkin' => 'required|numeric',
-            'checkout' => 'required|numeric'
+            'checkout' => 'required|numeric',
+            'workspace' => 'required',
+            'channel' => 'required_if:workspace,0'
         ];
     }
 }
