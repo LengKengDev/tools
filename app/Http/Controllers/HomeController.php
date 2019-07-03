@@ -17,4 +17,11 @@ class HomeController extends Controller
         $slacks = Auth::user()->slacks;
         return view('home.index', compact('slacks'));
     }
+
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function welcome(){
+        return view('welcome');
+    }
 }
