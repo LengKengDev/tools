@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Jobcan;
 use App\Console\Commands\RemoveFileCommand;
 use App\Console\Commands\SendGreetingEmail;
 use App\Console\Commands\SunGreeting;
@@ -18,7 +19,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         SendGreetingEmail::class,
         SunGreeting::class,
-        RemoveFileCommand::class
+        RemoveFileCommand::class,
+        Jobcan::class
     ];
 
     /**
@@ -29,8 +31,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('activitylog:clean')->daily();
+        $schedule->command('jobcan checkin')->weekdays()->dailyAt('09:30');
+        $schedule->command('jobcan checkout')->weekdays()->dailyAt('19:00');
     }
 
     /**

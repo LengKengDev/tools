@@ -93,6 +93,7 @@
                 <div class="card mt-4 shadow border-0" style="width: 20rem;">
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item"><a href="{{ route('watermark.index') }}">Watermark PDF</a></li>
+                        <li class="list-group-item"><a href="{{ route('home') }}">JOBCAN Autobot (SUN*)</a></li>
                     </ul>
                 </div>
             </div>

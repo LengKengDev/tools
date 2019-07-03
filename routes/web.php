@@ -17,11 +17,11 @@ Route::get('/', function () {
 
 Route::post('/webhook', 'PollsController@webHook');
 
-Auth::routes(['register' => false]);
+Auth::routes();
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', 'HomeController@index')->name('home');
-    Route::resource('rooms', 'RoomsController')->only(['index', 'show']);
+    Route::resource('slacks', 'SlacksController')->except(['index']);
 });
 
 Route::resource('watermark', 'WatermarkController')->only(['index', 'store']);
