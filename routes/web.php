@@ -23,3 +23,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::resource('watermark', 'WatermarkController')->only(['index', 'store']);
+
+Route::get('alexa', 'AlexaController@get');
+Route::post('alexa', 'AlexaController@set');
