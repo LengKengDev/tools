@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Console\Commands\Crawler;
+use App\Console\Commands\Export;
 use App\Console\Commands\Jobcan;
 use App\Console\Commands\RemoveFileCommand;
 use App\Console\Commands\SendGreetingEmail;
@@ -20,7 +22,9 @@ class Kernel extends ConsoleKernel
         SendGreetingEmail::class,
         SunGreeting::class,
         RemoveFileCommand::class,
-        Jobcan::class
+        Jobcan::class,
+        Export::class,
+        Crawler::class
     ];
 
     /**
