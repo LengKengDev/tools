@@ -14,6 +14,14 @@ class SlacksController extends Controller
     /**
      * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
+    public function index()
+    {
+        $slacks = Slack::paginate();
+        return view('slacks.index', compact('slacks'));
+    }
+    /**
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
     public function create()
     {
         return view('slacks.create');
