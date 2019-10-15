@@ -19,7 +19,7 @@ Auth::routes();
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/home', 'HomeController@index')->name('home');
-    Route::resource('slacks', 'SlacksController')->except(['index']);
+    Route::resource('slacks', 'SlacksController');
 });
 
 Route::resource('watermark', 'WatermarkController')->only(['index', 'store']);
