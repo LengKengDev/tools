@@ -23,10 +23,15 @@ class StockJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    public function __construct($room_id = null)
     {
         $this->token = env('CW_TOKEN');
-        $this->room_id = env('CW_ROOM');
+        if ($room_id == null) {
+            $this->room_id = env('CW_ROOM');
+        } else {
+            $this->room_id = $room_id;
+        }
+        $this->room_id = $room_id;
         $this->code = env('STOCK_CODE', '4053.T');
         $this->apiKey = env('STOCK_APIKEY', '');
     }
@@ -75,7 +80,7 @@ class StockJob implements ShouldQueue
 
     protected function template() {
         $time = Carbon::createFromTimestamp($this->data->regularMarketTime)->toDayDateTimeString();
-        return "[info][title]Sun*Stock {$time}[/title]"
+        return "[info][title]Sun*Stock | Cập nhật lúc {$time}[/title]"
             ."Giá hiện tại: {$this->data->regularMarketPrice} 円".PHP_EOL
             ."Khoảng giá trong ngày: {$this->data->regularMarketDayRange} 円".PHP_EOL
             ."Chart: https://www.tradingview.com/chart/?symbol=TSE%3A4053"
