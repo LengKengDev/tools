@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\StockJob;
 use App\Poll;
 use App\Quote;
 use App\Response;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Ixudra\Curl\Facades\Curl;
 
@@ -17,6 +19,7 @@ class PollsController extends Controller
     const CLOSE = 3;
     const INFO = 4;
     const QUOTE = 5;
+    const STOCK = 6;
     const FORCE_CLOSE = 6;
 
     protected $token;
@@ -31,6 +34,7 @@ class PollsController extends Controller
     protected $pollVoteRegexPlus = '/\+\d/i';
     protected $pollVoteRegexMinus = '/\-\d/i';
     protected $helpCmdRegex = '/#help/i';
+    protected $stockCmdRegex = '/#stock/i';
     protected $infoCmdRegex = '/#info/i';
     protected $quoteCmdRegex = '/#quote/i';
     protected $allCmdRegex = '/\[toall\]/i';
@@ -79,6 +83,9 @@ class PollsController extends Controller
             case self::QUOTE:
                 $this->response = $this->quoteAction();
                 break;
+            case self::STOCK:
+                dispatch(new StockJob())->delay(Carbon::now()->addSecond());
+                break;
             case self::ALL:
                 break;
             default: break;
@@ -121,6 +128,7 @@ class PollsController extends Controller
         if ($this->pollDetect($msg, $this->forceCloseRegex)) return self::FORCE_CLOSE;
         if ($this->pollDetect($msg, $this->infoCmdRegex)) return self::INFO;
         if ($this->pollDetect($msg, $this->quoteCmdRegex)) return self::QUOTE;
+        if ($this->pollDetect($msg, $this->stockCmdRegex)) return self::STOCK;
         return -1;
     }
 
@@ -228,6 +236,7 @@ class PollsController extends Controller
         array_push($this->messages, 'Em sẽ hỗ trợ mọi người tạo poll trên chatwork nhanh chóng với chỉ vài giây ạ.');
         array_push($this->messages, '■　Dưới đây là các lệnh để sử dụng:');
         array_push($this->messages, '[info]#help - Xem hướng dẫn sử dụng');
+        array_push($this->messages, '#stock - Check Sun*Stock');
         array_push($this->messages, '#poll - Mở một poll mới, bất cứ tin nhắn nào có nó đều sẽ được em chuyển thành poll ợ. Cú pháp: "#poll nội dung rất dài đằng sau.." ');
         array_push($this->messages, '#endpoll - Kết thúc một poll đang open, CHỈ có người mở poll mới có hiệu quả.');
         array_push($this->messages, '#info - Xem kết quả realtime của poll đang mở hoặc poll gần nhất trong room. Ai cũng xem được.');
