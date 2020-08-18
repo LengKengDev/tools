@@ -84,7 +84,7 @@ class PollsController extends Controller
                 $this->response = $this->quoteAction();
                 break;
             case self::STOCK:
-                dispatch(new StockJob())->delay(Carbon::now()->addSecond());
+                dispatch(new StockJob($this->room))->delay(Carbon::now()->addSecond());
                 break;
             case self::ALL:
                 break;
