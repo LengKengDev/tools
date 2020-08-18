@@ -64,7 +64,7 @@ class StockJob implements ShouldQueue
         $err = curl_error($curl);
 
         curl_close($curl);
-
+        echo $response;
         if ($err) {
             echo "cURL Error #:" . $err;
         } else {
@@ -79,9 +79,15 @@ class StockJob implements ShouldQueue
     }
 
     protected function template() {
+        $marker = '';
+        if ($this->data->regularMarketChange > 0) {
+            $marker = "⬆";
+        } else if ($this->data->regularMarketChange < 0) {
+            $marker = "⬇";
+        }
         $time = Carbon::createFromTimestamp($this->data->regularMarketTime)->toDayDateTimeString();
         return "[info][title]Sun*Stock | Cập nhật lúc {$time}[/title]"
-            ."Giá hiện tại: {$this->data->regularMarketPrice} 円".PHP_EOL
+            ."Giá hiện tại: {$this->data->regularMarketPrice} 円 ({$marker} {$this->data->regularMarketChange} = {$this->data->regularMarketChangePercent}%)".PHP_EOL
             ."Khoảng giá trong ngày: {$this->data->regularMarketDayRange} 円".PHP_EOL
             ."Chart: https://www.tradingview.com/chart/?symbol=TSE%3A4053"
             ."[/info]";

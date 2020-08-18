@@ -41,8 +41,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('watermark:clean')->dailyAt('00:00');
         $schedule->command('sun:greeting AM')->weekdays()->dailyAt('09:00');
         $schedule->command('sun:stock')->weekdays()->dailyAt('10:00');
+        $schedule->command('sun:stock')->weekdays()->dailyAt('13:00');
+        $schedule->command('sun:stock')->weekdays()->dailyAt('15:00');
         $schedule->command('jobcan checkin')->weekdays()->dailyAt('09:30');
         $schedule->command('jobcan checkout')->weekdays()->dailyAt('19:00');
+        $schedule->command('sun:stock')->weekdays()->dailyAt('19:01');
         $schedule->command('sun:greeting PM')->weekdays()->dailyAt('18:59');
     }
 
