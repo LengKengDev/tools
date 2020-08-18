@@ -19,7 +19,7 @@ class PollsController extends Controller
     const CLOSE = 3;
     const INFO = 4;
     const QUOTE = 5;
-    const STOCK = 6;
+    const STOCK = 7;
     const FORCE_CLOSE = 6;
 
     protected $token;
