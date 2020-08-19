@@ -31,7 +31,6 @@ class StockJob implements ShouldQueue
         } else {
             $this->room_id = $room_id;
         }
-        $this->room_id = $room_id;
         $this->code = env('STOCK_CODE', '4053.T');
         $this->apiKey = env('STOCK_APIKEY', '');
     }
