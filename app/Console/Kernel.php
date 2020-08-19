@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\Crawler;
 use App\Console\Commands\Export;
 use App\Console\Commands\Jobcan;
+use App\Console\Commands\NewsCommand;
 use App\Console\Commands\RemoveFileCommand;
 use App\Console\Commands\SendGreetingEmail;
 use App\Console\Commands\StockCommand;
@@ -26,7 +27,8 @@ class Kernel extends ConsoleKernel
         Jobcan::class,
         Export::class,
         Crawler::class,
-        StockCommand::class
+        StockCommand::class,
+        NewsCommand::class
     ];
 
     /**
@@ -40,12 +42,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('activitylog:clean')->daily();
         $schedule->command('watermark:clean')->dailyAt('00:00');
         $schedule->command('sun:greeting AM')->weekdays()->dailyAt('09:00');
+        $schedule->command('sun:news')->dailyAt('09:01');
         $schedule->command('sun:stock')->weekdays()->dailyAt('10:00');
         $schedule->command('sun:stock')->weekdays()->dailyAt('13:00');
-        $schedule->command('sun:stock')->weekdays()->dailyAt('15:00');
+        $schedule->command('sun:stock')->weekdays()->dailyAt('15:20');
         $schedule->command('jobcan checkin')->weekdays()->dailyAt('09:30');
         $schedule->command('jobcan checkout')->weekdays()->dailyAt('19:00');
-        $schedule->command('sun:stock')->weekdays()->dailyAt('19:01');
+        $schedule->command('sun:news')->weekdays()->dailyAt('19:01');
+        $schedule->command('sun:stock')->weekdays()->dailyAt('19:02');
         $schedule->command('sun:greeting PM')->weekdays()->dailyAt('18:59');
     }
 

@@ -51,15 +51,14 @@ class SunGreetingAmJob implements ShouldQueue
     public function quoteTemplate(Carbon $now, Quote $quote)
     {
 
-        return "CHÀO BUỔI SÁNG CẢ NHÀ Ạ {$now->day}/{$now->month}.".PHP_EOL.PHP_EOL
-            ."Chúc tất cả mọi người một ngày làm việc hiệu quả và đầy niềm vui nhé!".PHP_EOL.PHP_EOL
-            ."[info][title]Thông tin thời tiết ngày hôm nay:[/title]{$this->parseWeather()}[/info]".PHP_EOL
-            ."↓[info][title]Tình hình Covid 19[/title]Việt Nam: https://ncov.moh.gov.vn/".PHP_EOL
+        return "(flex) CHÀO BUỔI SÁNG CẢ NHÀ Ạ {$now->day}/{$now->month} (flex).".PHP_EOL.PHP_EOL
+            ."(h) Chúc tất cả mọi người một ngày làm việc hiệu quả và đầy niềm vui nhé! (h)".PHP_EOL.PHP_EOL
+            ."[info][title]Thông tin thời tiết ngày hôm nay (gogo)[/title]{$this->parseWeather()}[/info]".PHP_EOL
+            ."↓[info][title]Tình hình Covid 19 (whew)[/title]Việt Nam: https://ncov.moh.gov.vn/".PHP_EOL
             ."Nhật Bản: https://www.stopcovid19.jp/[/info]"
-            ."↓[info][title]Quote trong ngày[/title]{$quote->content}[/info]"
-            ."↓[info][title]Luôn luôn lắng nghe, luôn luôn thấu hiểu[/title]Trong quá trình làm việc tại Sun*Nhật, hẳn ai cũng có những lúc có những khó khăn, bất mãn, những góp ý, đóng góp mà không biết chia sẻ cùng ai. Vậy thì hãy điền cả vào đây, mọi ý kiến, khó khăn, bất mãn của bạn sẽ đều được lắng nghe và thấu hiểu!
+            ."↓[info][title]Luôn luôn lắng nghe, luôn luôn thấu hiểu (devil)[/title]Trong quá trình làm việc tại Sun*Nhật, hẳn ai cũng có những lúc có những khó khăn, bất mãn, những góp ý, đóng góp mà không biết chia sẻ cùng ai. Vậy thì hãy điền cả vào đây, mọi ý kiến, khó khăn, bất mãn của bạn sẽ đều được lắng nghe và thấu hiểu!
 https://docs.google.com/forms/d/e/1FAIpQLSdGnL_3GxTsBtjcHes_MgGPT3IMBnpT-pjEUmM8RmvdgxxYCw/viewform[/info]"
-            ." (dance2)(dance3)(dance4)(dance5)(dance6)(dance2)(dance3)(dance4)(dance5)(dance6)";
+            ."(F)(F)(F)(F)(F)(F)(F)(F)(F)(F)";
     }
 
     protected function parseWeather () {

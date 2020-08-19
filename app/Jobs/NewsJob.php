@@ -2,7 +2,6 @@
 
 namespace App\Jobs;
 
-use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -10,13 +9,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Ixudra\Curl\Facades\Curl;
 
-class StockJob implements ShouldQueue
+class NewsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     protected $token;
     protected $room_id;
-    protected $data;
-    protected $code = '4053.T';
     protected $apiKey = null;
     /**
      * Create a new job instance.
@@ -31,7 +28,6 @@ class StockJob implements ShouldQueue
         } else {
             $this->room_id = $room_id;
         }
-        $this->code = env('STOCK_CODE', '4053.T');
         $this->apiKey = env('STOCK_APIKEY', '');
     }
 
@@ -45,7 +41,7 @@ class StockJob implements ShouldQueue
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://yahoo-finance-free.p.rapidapi.com/v6/finance/quote?region=US&lang=en&symbols={$this->code}",
+            CURLOPT_URL => "https://google-news.p.rapidapi.com/v1/top_headlines?lang=vn&country=VN",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_ENCODING => "",
@@ -54,7 +50,7 @@ class StockJob implements ShouldQueue
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
             CURLOPT_HTTPHEADER => array(
-                "x-rapidapi-host: yahoo-finance-free.p.rapidapi.com",
+                "x-rapidapi-host: google-news.p.rapidapi.com",
                 "x-rapidapi-key: {$this->apiKey}"
             ),
         ));
@@ -63,32 +59,23 @@ class StockJob implements ShouldQueue
         $err = curl_error($curl);
 
         curl_close($curl);
-        echo $response;
-        if ($err) {
-            echo "cURL Error #:" . $err;
-        } else {
+
+        if (!$err) {
             $obj = json_decode($response);
-            $this->data = $obj->quoteResponse->result[0];
             $response = Curl::to("https://api.chatwork.com/v2/rooms/{$this->room_id}/messages")
                 ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
-                ->withData( array( 'body' => $this->template()))
+                ->withData( array( 'body' => $this->template($obj->articles)))
                 ->post();
         }
-
     }
 
-    protected function template() {
-        $marker = '';
-        if ($this->data->regularMarketChange > 0) {
-            $marker = "⬆";
-        } else if ($this->data->regularMarketChange < 0) {
-            $marker = "⬇";
-        }
-        $time = Carbon::createFromTimestamp($this->data->regularMarketTime)->toDayDateTimeString();
-        return "[info][title]Sun*Stock | Cập nhật lúc {$time} (:/)[/title]"
-            ."Giá hiện tại: {$this->data->regularMarketPrice} 円 ({$marker} {$this->data->regularMarketChange} = {$this->data->regularMarketChangePercent}%)".PHP_EOL
-            ."Khoảng giá trong ngày: {$this->data->regularMarketDayRange} 円".PHP_EOL
-            ."Chart: https://www.tradingview.com/chart/?symbol=TSE%3A4053"
+    private function template($data) {
+        return "[info][title]Tin tức mới top trong ngày (lightbulb) [/title]"
+            .$data[0]->title.PHP_EOL.'➝ '.$data[0]->link.PHP_EOL
+            .$data[1]->title.PHP_EOL.'➝ '.$data[1]->link.PHP_EOL
+            .$data[2]->title.PHP_EOL.'➝ '.$data[2]->link.PHP_EOL
+            .$data[3]->title.PHP_EOL.'➝ '.$data[3]->link.PHP_EOL
+            .$data[4]->title.PHP_EOL.'➝ '.$data[4]->link.PHP_EOL
             ."[/info]";
     }
 }
