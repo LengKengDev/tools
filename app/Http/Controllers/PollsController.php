@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\NewsJob;
 use App\Jobs\StockJob;
 use App\Poll;
 use App\Quote;
@@ -20,6 +21,7 @@ class PollsController extends Controller
     const INFO = 4;
     const QUOTE = 5;
     const STOCK = 7;
+    const NEWS = 8;
     const FORCE_CLOSE = 6;
 
     protected $token;
@@ -35,6 +37,7 @@ class PollsController extends Controller
     protected $pollVoteRegexMinus = '/\-\d/i';
     protected $helpCmdRegex = '/#help/i';
     protected $stockCmdRegex = '/#stock/i';
+    protected $newsmdRegex = '/#news/i';
     protected $infoCmdRegex = '/#info/i';
     protected $quoteCmdRegex = '/#quote/i';
     protected $allCmdRegex = '/\[toall\]/i';
@@ -86,6 +89,9 @@ class PollsController extends Controller
             case self::STOCK:
                 dispatch(new StockJob($this->room))->delay(Carbon::now()->addSecond());
                 break;
+            case self::NEWS:
+                dispatch(new NewsJob($this->room))->delay(Carbon::now()->addSecond());
+                break;
             case self::ALL:
                 break;
             default: break;
@@ -129,6 +135,7 @@ class PollsController extends Controller
         if ($this->pollDetect($msg, $this->infoCmdRegex)) return self::INFO;
         if ($this->pollDetect($msg, $this->quoteCmdRegex)) return self::QUOTE;
         if ($this->pollDetect($msg, $this->stockCmdRegex)) return self::STOCK;
+        if ($this->pollDetect($msg, $this->newsmdRegex)) return self::NEWS;
         return -1;
     }
 
