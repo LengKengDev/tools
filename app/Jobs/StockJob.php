@@ -45,7 +45,7 @@ class StockJob implements ShouldQueue
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://yahoo-finance-free.p.rapidapi.com/v6/finance/quote?region=US&lang=en&symbols={$this->code}",
+            CURLOPT_URL => "https://yahoo-finance15.p.rapidapi.com/api/yahoo/qu/quote/{$this->code}",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_ENCODING => "",
@@ -54,7 +54,7 @@ class StockJob implements ShouldQueue
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
             CURLOPT_HTTPHEADER => array(
-                "x-rapidapi-host: yahoo-finance-free.p.rapidapi.com",
+                "x-rapidapi-host: yahoo-finance15.p.rapidapi.com",
                 "x-rapidapi-key: {$this->apiKey}"
             ),
         ));
@@ -68,7 +68,7 @@ class StockJob implements ShouldQueue
             echo "cURL Error #:" . $err;
         } else {
             $obj = json_decode($response);
-            $this->data = $obj->quoteResponse->result[0];
+            $this->data = $obj[0];
             $response = Curl::to("https://api.chatwork.com/v2/rooms/{$this->room_id}/messages")
                 ->withHeaders( array( "X-ChatWorkToken: {$this->token}") )
                 ->withData( array( 'body' => $this->template()))
@@ -84,10 +84,10 @@ class StockJob implements ShouldQueue
         } else if ($this->data->regularMarketChange < 0) {
             $marker = "⬇";
         }
-        $time = Carbon::createFromTimestamp($this->data->regularMarketTime)->toDayDateTimeString();
+        $time = Carbon::parse($this->data->regularMarketTime->date)->addHours(9)->toDayDateTimeString();
         return "[info][title]Sun*Stock | Cập nhật lúc {$time} (:/)[/title]"
             ."Giá hiện tại: {$this->data->regularMarketPrice} 円 ({$marker} {$this->data->regularMarketChange} = {$this->data->regularMarketChangePercent}%)".PHP_EOL
-            ."Khoảng giá trong ngày: {$this->data->regularMarketDayRange} 円".PHP_EOL
+            ."Khoảng giá trong ngày: {$this->data->regularMarketDayLow} - {$this->data->regularMarketDayHigh} 円".PHP_EOL
             ."Chart: https://www.tradingview.com/chart/?symbol=TSE%3A4053"
             ."[/info]";
     }
